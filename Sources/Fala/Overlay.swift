@@ -160,8 +160,8 @@ private struct NotchIsland: View {
 
                 if let message {
                     Text(message)
-                        .font(.system(size: 12.5, weight: .medium, design: .rounded))
-                        .foregroundStyle(isError(phase) ? Color.orange : .white.opacity(0.88))
+                        .font(.system(size: 12.5, weight: .medium))
+                        .foregroundStyle(.white.opacity(isError(phase) ? 0.7 : 0.9))
                         .lineLimit(1)
                         .truncationMode(.head)
                         .padding(.horizontal, 22)
@@ -228,8 +228,8 @@ private struct GlassPill: View {
             .frame(height: 30)
             if let message {
                 Text(message)
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundStyle(isError(phase) ? Color.orange : .primary.opacity(0.85))
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.primary.opacity(isError(phase) ? 0.65 : 0.85))
                     .lineLimit(2)
                     .truncationMode(.head)
                     .frame(maxWidth: 380)
@@ -260,11 +260,11 @@ private struct Indicator: View {
         switch controller.phase {
         case .listening:
             HStack(spacing: 6) {
-                PulseDot(level: controller.level, latched: controller.latched)
+                PulseDot(level: controller.level, latched: controller.latched, tint: tint)
                 if let start = controller.startedAt {
                     TimelineView(.periodic(from: start, by: 1)) { ctx in
                         Text(Self.elapsed(from: start, to: ctx.date))
-                            .font(.system(size: 12, weight: .semibold, design: .rounded).monospacedDigit())
+                            .font(.system(size: 12, weight: .semibold).monospacedDigit())
                             .foregroundStyle(tint.opacity(0.8))
                     }
                 }
@@ -277,15 +277,15 @@ private struct Indicator: View {
                 .symbolEffect(.pulse, options: .repeating)
                 .transition(.blurReplace)
         case .done:
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(.green)
+            Image(systemName: "checkmark")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(tint)
                 .symbolEffect(.bounce, options: .nonRepeating)
                 .transition(.blurReplace)
         case .error:
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(.orange)
+            Image(systemName: "exclamationmark.circle")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(tint.opacity(0.7))
                 .transition(.blurReplace)
         case .idle:
             Color.clear.frame(width: 1, height: 1)
@@ -301,17 +301,17 @@ private struct Indicator: View {
 private struct PulseDot: View {
     let level: Float
     let latched: Bool
+    let tint: Color
 
     var body: some View {
         ZStack {
             Circle()
-                .fill(Color.red.opacity(0.35))
-                .frame(width: 8 + CGFloat(level) * 10, height: 8 + CGFloat(level) * 10)
-            Circle()
-                .fill(LinearGradient(colors: [Color(red: 1, green: 0.35, blue: 0.4), .red], startPoint: .top, endPoint: .bottom))
-                .frame(width: 8, height: 8)
+                .fill(tint.opacity(0.18))
+                .frame(width: 7 + CGFloat(level) * 9, height: 7 + CGFloat(level) * 9)
             if latched {
-                Image(systemName: "lock.fill").font(.system(size: 5, weight: .black)).foregroundStyle(.white)
+                Image(systemName: "lock.fill").font(.system(size: 7, weight: .bold)).foregroundStyle(tint)
+            } else {
+                Circle().fill(tint).frame(width: 6, height: 6)
             }
         }
         .frame(width: 18, height: 18)
@@ -331,7 +331,7 @@ private struct Trailing: View {
         case .transcribing:
             Waveform(level: 0.45, color: color.opacity(0.7), thinking: true)
         case .done:
-            Text("Pronto").font(.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(color.opacity(0.8))
+            Text("Inserido").font(.system(size: 12, weight: .medium)).foregroundStyle(color.opacity(0.8))
                 .transition(.blurReplace)
         default:
             EmptyView()

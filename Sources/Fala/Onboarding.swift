@@ -13,25 +13,23 @@ struct OnboardingView: View {
     private let steps = 6
 
     var body: some View {
-        ZStack {
-            Backdrop()
-            VStack(spacing: 0) {
-                ZStack {
-                    page(step)
-                        .id(step)
-                        .transition(.asymmetric(
-                            insertion: .offset(x: forward ? 40 : -40).combined(with: .opacity).combined(with: .scale(scale: 0.98)),
-                            removal: .offset(x: forward ? -40 : 40).combined(with: .opacity)))
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-                footer
+        VStack(spacing: 0) {
+            ZStack {
+                page(step)
+                    .id(step)
+                    .transition(.asymmetric(
+                        insertion: .offset(x: forward ? 24 : -24).combined(with: .opacity),
+                        removal: .offset(x: forward ? -24 : 24).combined(with: .opacity)))
             }
-            .padding(.horizontal, 44)
-            .padding(.top, 40)
-            .padding(.bottom, 28)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+
+            footer
         }
-        .frame(width: 620, height: 600)
+        .padding(.horizontal, 48)
+        .padding(.top, 52)
+        .padding(.bottom, 28)
+        .frame(width: 600, height: 560)
+        .background(.background)
         .onAppear { account.refresh() }
     }
 
@@ -50,100 +48,109 @@ struct OnboardingView: View {
     }
 
     private var welcome: some View {
-        VStack(spacing: 22) {
-            Spacer()
-            AppGlyph(size: 112)
-            VStack(spacing: 10) {
-                Text("Fala").font(.system(size: 44, weight: .bold, design: .rounded))
-                Text("Sua voz vira texto em qualquer app.\nSegure um atalho, fale e solte. Pronto.")
-                    .font(.system(size: 16))
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(.secondary)
-            }
+        VStack(spacing: 0) {
+            Spacer(minLength: 40)
+            AppMark(size: 96)
+            Text("Fala")
+                .font(.system(size: 34, weight: .semibold))
+                .tracking(-0.6)
+                .padding(.top, 26)
+            Text("Dite em qualquer app.\nSegure um atalho, fale e solte.")
+                .font(.system(size: 15))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .lineSpacing(3)
+                .padding(.top, 10)
             Spacer()
         }
     }
 
     private var engine: some View {
-        VStack(spacing: 26) {
-            Header(title: "Como transcrever?", subtitle: "Você pode trocar a qualquer momento pelo menu.")
-            HStack(spacing: 16) {
+        VStack(spacing: 28) {
+            Header(title: "Motor de transcrição", subtitle: "Você pode trocar depois pelo menu da barra.")
+            VStack(spacing: 10) {
                 ForEach(Engine.allCases) { e in
-                    EngineCard(engine: e, selected: settings.engine == e) {
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { settings.engine = e }
+                    EngineRow(engine: e, selected: settings.engine == e) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 1)) { settings.engine = e }
                     }
                 }
             }
-            Spacer()
         }
     }
 
     private var setup: some View {
-        VStack(spacing: 26) {
+        VStack(spacing: 28) {
             if settings.engine == .chatgpt {
-                Header(title: "Conecte sua conta", subtitle: "Usa sua assinatura do ChatGPT através do login do Codex.\nNada de chave de API — conta na sua cota do plano.")
-                Card { AccountRow(account: account) }
+                Header(title: "Conta ChatGPT", subtitle: "O Fala usa o login do Codex. Sem chave de API —\na transcrição conta na cota da sua assinatura.")
+                Surface { AccountRow(account: account) }
             } else {
-                Header(title: "Modelo da Apple", subtitle: "O reconhecimento roda inteiro no seu Mac.\nO macOS baixa o modelo do idioma uma única vez.")
-                Card {
-                    VStack(spacing: 16) {
-                        Picker("Idioma", selection: $settings.language) {
-                            ForEach(LanguageOption.all.dropFirst()) { Text($0.name).tag($0.code) }
+                Header(title: "Modelo on-device", subtitle: "A transcrição roda inteira no seu Mac.\nO macOS baixa o modelo do idioma uma única vez.")
+                Surface {
+                    VStack(spacing: 14) {
+                        HStack {
+                            Text("Idioma").font(.system(size: 13))
+                            Spacer()
+                            Picker("Idioma", selection: $settings.language) {
+                                ForEach(LanguageOption.all.dropFirst()) { Text($0.name).tag($0.code) }
+                            }
+                            .labelsHidden()
+                            .fixedSize()
                         }
+                        Divider()
                         AppleModelRow(model: appleModel, language: settings.language)
                     }
                 }
                 .onAppear { if settings.language == "auto" { settings.language = "pt" } }
             }
-            Spacer()
         }
     }
 
     private var permissionsPage: some View {
-        VStack(spacing: 26) {
-            Header(title: "Duas permissões", subtitle: "O áudio só é capturado enquanto o atalho estiver ativo.")
-            Card { PermissionRows(permissions: permissions) }
-            Spacer()
+        VStack(spacing: 28) {
+            Header(title: "Permissões", subtitle: "O microfone só é usado enquanto o atalho está ativo.")
+            Surface { PermissionRows(permissions: permissions) }
         }
     }
 
     private var shortcut: some View {
-        VStack(spacing: 26) {
-            Header(title: "Seu atalho", subtitle: "Clique e pressione uma tecla, uma combinação\nou um modificador sozinho, como ⌥ direito ou fn.")
+        VStack(spacing: 28) {
+            Header(title: "Atalho", subtitle: "Clique e pressione uma tecla, uma combinação,\nou um modificador sozinho, como ⌥ direito ou fn.")
             ShortcutRecorder(large: true)
-            Picker("Modo", selection: $settings.mode) {
-                ForEach(TriggerMode.allCases) { Text($0.title).tag($0) }
+            VStack(spacing: 12) {
+                Picker("Modo", selection: $settings.mode) {
+                    ForEach(TriggerMode.allCases) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .frame(width: 300)
+                Text(settings.mode.detail)
+                    .font(.system(size: 12.5))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(width: 380, height: 36, alignment: .top)
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .frame(width: 320)
-            Text(settings.mode.detail)
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .frame(height: 40, alignment: .top)
-            Spacer()
         }
     }
 
     private var tryIt: some View {
-        VStack(spacing: 22) {
-            Header(title: "Experimente", subtitle: "Clique na caixa, segure o atalho e diga algo.")
-            HStack(spacing: 6) {
+        VStack(spacing: 24) {
+            Header(title: "Experimente", subtitle: "Clique no campo abaixo, segure o atalho e fale.")
+            HStack(spacing: 5) {
                 ForEach(Array(settings.shortcut.parts.enumerated()), id: \.offset) { _, p in KeyCap(text: p, large: true) }
             }
             TextEditor(text: $tryText)
-                .font(.system(size: 15))
+                .font(.system(size: 14))
                 .scrollContentBackground(.hidden)
                 .scrollIndicators(.never)
-                .padding(14)
-                .frame(height: 150)
-                .glassEffect(.regular, in: .rect(cornerRadius: 18))
+                .padding(12)
+                .frame(height: 130)
+                .background(.quaternary.opacity(0.5), in: .rect(cornerRadius: 12, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(.separator))
             if !permissions.accessibility {
-                Label("Sem a permissão de Acessibilidade o atalho não funciona.", systemImage: "exclamationmark.triangle.fill")
-                    .font(.callout).foregroundStyle(.orange)
+                Label("O atalho precisa da permissão de Acessibilidade.", systemImage: "exclamationmark.circle")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
             }
-            Spacer()
         }
         .onAppear { permissions.poll() }
     }
@@ -151,35 +158,35 @@ struct OnboardingView: View {
     // MARK: Footer
 
     private var footer: some View {
-        HStack {
-            Button("Voltar") { go(-1) }
-                .buttonStyle(.glass)
-                .opacity(step == 0 ? 0 : 1)
-                .disabled(step == 0)
-
-            Spacer()
-            HStack(spacing: 7) {
+        ZStack {
+            HStack(spacing: 6) {
                 ForEach(0..<steps, id: \.self) { i in
-                    Capsule()
-                        .fill(i == step ? Color.primary : Color.primary.opacity(0.2))
-                        .frame(width: i == step ? 18 : 7, height: 7)
+                    Circle()
+                        .fill(i == step ? Color.primary : Color.primary.opacity(0.18))
+                        .frame(width: 6, height: 6)
                 }
             }
-            .animation(.spring(response: 0.35, dampingFraction: 0.75), value: step)
-            Spacer()
+            .animation(.easeOut(duration: 0.2), value: step)
 
-            Button(nextTitle) {
-                if step == steps - 1 {
-                    settings.onboarded = true
-                    finish()
-                } else {
-                    go(1)
+            HStack {
+                if step > 0 {
+                    Button("Voltar") { go(-1) }
+                        .buttonStyle(PillButtonStyle(prominent: false))
+                        .transition(.opacity)
                 }
+                Spacer()
+                Button(nextTitle) {
+                    if step == steps - 1 {
+                        settings.onboarded = true
+                        finish()
+                    } else {
+                        go(1)
+                    }
+                }
+                .buttonStyle(PillButtonStyle(prominent: true))
+                .keyboardShortcut(.defaultAction)
             }
-            .buttonStyle(.glassProminent)
-            .keyboardShortcut(.defaultAction)
         }
-        .controlSize(.large)
     }
 
     private var nextTitle: String {
@@ -193,7 +200,7 @@ struct OnboardingView: View {
 
     private func go(_ delta: Int) {
         forward = delta > 0
-        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+        withAnimation(.spring(response: 0.35, dampingFraction: 1)) {
             step = min(max(step + delta, 0), steps - 1)
         }
     }
@@ -207,96 +214,69 @@ private struct Header: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            Text(title).font(.system(size: 28, weight: .bold, design: .rounded))
+            Text(title)
+                .font(.system(size: 24, weight: .semibold))
+                .tracking(-0.4)
             Text(subtitle)
-                .font(.system(size: 14))
+                .font(.system(size: 13.5))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+                .lineSpacing(2)
         }
-        .padding(.top, 8)
     }
 }
 
-private struct Card<Content: View>: View {
+private struct Surface<Content: View>: View {
     @ViewBuilder var content: Content
 
     var body: some View {
         content
-            .padding(20)
+            .padding(18)
             .frame(maxWidth: .infinity)
-            .glassEffect(.regular, in: .rect(cornerRadius: 22))
+            .background(.quaternary.opacity(0.45), in: .rect(cornerRadius: 14, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.separator.opacity(0.6)))
     }
 }
 
-private struct EngineCard: View {
+private struct EngineRow: View {
     let engine: Engine
     let selected: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Image(systemName: engine.symbol)
-                        .font(.system(size: 22, weight: .semibold))
-                        .frame(width: 44, height: 44)
-                        .background(.tint.opacity(0.15), in: .rect(cornerRadius: 12, style: .continuous))
-                        .foregroundStyle(.tint)
-                    Spacer()
-                    Image(systemName: selected ? "checkmark.circle.fill" : "circle")
-                        .font(.system(size: 20))
-                        .foregroundStyle(selected ? AnyShapeStyle(.tint) : AnyShapeStyle(.tertiary))
-                        .contentTransition(.symbolEffect(.replace))
-                }
-                Text(engine.title).font(.system(size: 17, weight: .semibold))
-                Text(engine.subtitle)
-                    .font(.system(size: 12.5))
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                Spacer(minLength: 0)
-                HStack(spacing: 6) {
-                    ForEach(tags, id: \.self) { t in
-                        Text(t).font(.system(size: 11, weight: .medium))
-                            .padding(.horizontal, 8).padding(.vertical, 3)
-                            .background(.primary.opacity(0.07), in: .capsule)
+            HStack(spacing: 14) {
+                Image(systemName: engine.symbol)
+                    .font(.system(size: 17, weight: .medium))
+                    .frame(width: 36, height: 36)
+                    .background(.primary.opacity(0.06), in: .rect(cornerRadius: 9, style: .continuous))
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 8) {
+                        Text(engine.title).font(.system(size: 14, weight: .semibold))
+                        Text(engine == .chatgpt ? "Recomendado" : "Offline")
+                            .font(.system(size: 10.5, weight: .medium))
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 6).padding(.vertical, 2)
+                            .background(.primary.opacity(0.06), in: .capsule)
                     }
+                    Text(engine.subtitle)
+                        .font(.system(size: 12.5))
+                        .foregroundStyle(.secondary)
                 }
+                Spacer()
+                Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 18, weight: .regular))
+                    .foregroundStyle(selected ? AnyShapeStyle(.primary) : AnyShapeStyle(.tertiary))
+                    .contentTransition(.symbolEffect(.replace))
             }
-            .padding(18)
-            .frame(maxWidth: .infinity, minHeight: 230, maxHeight: 230, alignment: .topLeading)
-            .contentShape(.rect(cornerRadius: 22))
-            .glassEffect(selected ? .regular.tint(.accentColor.opacity(0.16)).interactive() : .regular.interactive(), in: .rect(cornerRadius: 22))
+            .padding(16)
+            .contentShape(.rect(cornerRadius: 14))
+            .background(.quaternary.opacity(selected ? 0.7 : 0.35), in: .rect(cornerRadius: 14, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .strokeBorder(selected ? Color.accentColor.opacity(0.8) : .clear, lineWidth: 2)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(selected ? AnyShapeStyle(.primary.opacity(0.85)) : AnyShapeStyle(.separator.opacity(0.6)), lineWidth: selected ? 1.5 : 1)
             }
-            .scaleEffect(selected ? 1 : 0.98)
         }
         .buttonStyle(.plain)
-    }
-
-    private var tags: [String] {
-        engine == .chatgpt ? ["Precisão máxima", "Multilíngue"] : ["Offline", "Privado", "Ao vivo"]
-    }
-}
-
-/// Soft, slowly drifting color field behind the glass.
-private struct Backdrop: View {
-    var body: some View {
-        TimelineView(.animation(minimumInterval: 1 / 30)) { ctx in
-            let t = Float(ctx.date.timeIntervalSinceReferenceDate)
-            MeshGradient(width: 3, height: 3, points: [
-                [0, 0], [0.5, 0], [1, 0],
-                [0, 0.5], [0.5 + 0.12 * sin(t * 0.4), 0.5 + 0.1 * cos(t * 0.33)], [1, 0.5],
-                [0, 1], [0.5, 1], [1, 1],
-            ], colors: [
-                Color(red: 0.36, green: 0.33, blue: 0.95), Color(red: 0.55, green: 0.38, blue: 0.98), Color(red: 0.93, green: 0.42, blue: 0.78),
-                Color(red: 0.25, green: 0.5, blue: 0.98), Color(red: 0.62, green: 0.45, blue: 0.95), Color(red: 0.98, green: 0.55, blue: 0.6),
-                Color(red: 0.2, green: 0.62, blue: 0.95), Color(red: 0.45, green: 0.55, blue: 0.98), Color(red: 0.95, green: 0.65, blue: 0.55),
-            ])
-            .opacity(0.75)
-            .overlay(.background.opacity(0.4))
-        }
-        .ignoresSafeArea()
     }
 }

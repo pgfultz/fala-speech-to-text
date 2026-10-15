@@ -86,7 +86,7 @@ struct SettingsView: View {
 
             Section {
                 HStack {
-                    Button("Refazer configuração inicial", action: reopenOnboarding).buttonStyle(.glass)
+                    Button("Refazer configuração inicial", action: reopenOnboarding).buttonStyle(PillButtonStyle(prominent: false))
                     Spacer()
                     Text("Fala 1.0").font(.caption).foregroundStyle(.tertiary)
                 }

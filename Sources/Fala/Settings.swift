@@ -7,7 +7,7 @@ enum Engine: String, CaseIterable, Identifiable {
     var title: String { self == .chatgpt ? "ChatGPT" : "Apple on-device" }
     var subtitle: String {
         switch self {
-        case .chatgpt: "Usa sua assinatura do ChatGPT (login do Codex). Máxima precisão."
+        case .chatgpt: "Sua assinatura do ChatGPT, via login do Codex. Máxima precisão."
         case .apple: "Roda 100% no seu Mac. Offline, privado e instantâneo."
         }
     }

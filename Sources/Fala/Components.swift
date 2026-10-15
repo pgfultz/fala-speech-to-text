@@ -122,13 +122,13 @@ struct KeyCap: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: large ? 17 : 13, weight: .semibold, design: .rounded))
+            .font(.system(size: large ? 15 : 12, weight: .medium))
             .padding(.horizontal, large ? 12 : 8)
             .frame(minWidth: large ? 40 : 26, minHeight: large ? 40 : 26)
             .background {
                 RoundedRectangle(cornerRadius: large ? 10 : 7, style: .continuous)
-                    .fill(.background.secondary)
-                    .shadow(color: .black.opacity(0.18), radius: 0, y: 1.5)
+                    .fill(.background)
+                    .shadow(color: .black.opacity(0.12), radius: 0.5, y: 1)
             }
             .overlay {
                 RoundedRectangle(cornerRadius: large ? 10 : 7, style: .continuous)
@@ -152,11 +152,12 @@ struct ShortcutRecorder: View {
         } label: {
             HStack(spacing: 6) {
                 if recording {
-                    Image(systemName: "record.circle")
-                        .foregroundStyle(.red)
-                        .symbolEffect(.pulse, options: .repeating)
+                    Circle()
+                        .fill(.primary)
+                        .frame(width: 6, height: 6)
+                        .phaseAnimator([1.0, 0.3]) { v, o in v.opacity(o) } animation: { _ in .easeInOut(duration: 0.7) }
                     Text(held.isEmpty ? "Pressione o atalho…" : Shortcut(keyCode: lastModifier ?? 0, modifiers: 0).partsForFlags(held).joined(separator: " "))
-                        .font(.system(size: large ? 15 : 13, weight: .medium, design: .rounded))
+                        .font(.system(size: large ? 14 : 12.5))
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(Array(settings.shortcut.parts.enumerated()), id: \.offset) { _, part in
@@ -168,7 +169,8 @@ struct ShortcutRecorder: View {
             .padding(.vertical, large ? 10 : 4)
             .frame(minWidth: large ? 240 : 140, minHeight: large ? 60 : 34)
             .contentShape(.capsule)
-            .glassEffect(recording ? .regular.tint(.red.opacity(0.18)).interactive() : .regular.interactive(), in: .capsule)
+            .background(.quaternary.opacity(recording ? 0.8 : 0.45), in: .capsule)
+            .overlay(Capsule().strokeBorder(recording ? AnyShapeStyle(.primary.opacity(0.7)) : AnyShapeStyle(.separator.opacity(0.6))))
         }
         .buttonStyle(.plain)
         .help("Clique e pressione uma tecla, combinação, ou um modificador sozinho (ex: ⌥ direito, fn)")
@@ -242,18 +244,16 @@ struct StatusRow<Trailing: View>: View {
     let symbol: String
     let title: String
     let detail: String
-    var tint: Color = .accentColor
     @ViewBuilder var trailing: Trailing
 
     var body: some View {
         HStack(spacing: 14) {
             Image(systemName: symbol)
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(tint)
-                .frame(width: 38, height: 38)
-                .background(tint.opacity(0.14), in: .rect(cornerRadius: 10, style: .continuous))
+                .font(.system(size: 15, weight: .medium))
+                .frame(width: 34, height: 34)
+                .background(.primary.opacity(0.06), in: .rect(cornerRadius: 9, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.system(size: 13.5, weight: .semibold))
+                Text(title).font(.system(size: 13, weight: .semibold))
                 Text(detail).font(.system(size: 12)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 8)
@@ -264,10 +264,10 @@ struct StatusRow<Trailing: View>: View {
 
 struct GrantedBadge: View {
     var body: some View {
-        Label("Pronto", systemImage: "checkmark.circle.fill")
+        Label("Pronto", systemImage: "checkmark")
             .labelStyle(.titleAndIcon)
-            .font(.system(size: 12, weight: .semibold))
-            .foregroundStyle(.green)
+            .font(.system(size: 12, weight: .medium))
+            .foregroundStyle(.secondary)
             .transition(.scale.combined(with: .opacity))
     }
 }
@@ -276,16 +276,15 @@ struct AccountRow: View {
     let account: AccountModel
 
     var body: some View {
-        StatusRow(symbol: "sparkles", title: "Conta ChatGPT", detail: account.connected ? account.label : (account.codexInstalled ? "Usa o mesmo login do Codex — sem chave de API" : "Instale o Codex CLI: npm i -g @openai/codex"),
-                  tint: account.connected ? .green : .accentColor) {
+        StatusRow(symbol: "sparkles", title: "Conta ChatGPT", detail: account.connected ? account.label : (account.codexInstalled ? "Usa o mesmo login do Codex — sem chave de API" : "Instale o Codex CLI: npm i -g @openai/codex")) {
             if account.connected {
                 GrantedBadge()
             } else if account.loggingIn {
                 HStack(spacing: 6) { ProgressView().controlSize(.small); Text("Aguardando navegador…").font(.caption).foregroundStyle(.secondary) }
             } else if account.codexInstalled {
-                Button("Entrar com ChatGPT") { account.login() }.buttonStyle(.glassProminent)
+                Button("Entrar com ChatGPT") { account.login() }.buttonStyle(PillButtonStyle(prominent: true))
             } else {
-                Button("Copiar comando") { Paster.copy("npm i -g @openai/codex") }.buttonStyle(.glass)
+                Button("Copiar comando") { Paster.copy("npm i -g @openai/codex") }.buttonStyle(PillButtonStyle(prominent: false))
             }
         }
         .animation(.spring, value: account.connected)
@@ -297,14 +296,14 @@ struct AppleModelRow: View {
     let language: String
 
     var body: some View {
-        StatusRow(symbol: "apple.logo", title: "Modelo on-device", detail: detail, tint: model.state == .ready ? .green : .accentColor) {
+        StatusRow(symbol: "apple.logo", title: "Modelo on-device", detail: detail) {
             switch model.state {
             case .ready: GrantedBadge()
             case .unsupported: Text("Indisponível").font(.caption).foregroundStyle(.secondary)
             case .downloading(let p):
                 ProgressView(value: p).frame(width: 90)
             case .missing:
-                Button("Baixar modelo") { model.install(language: language) }.buttonStyle(.glassProminent)
+                Button("Baixar modelo") { model.install(language: language) }.buttonStyle(PillButtonStyle(prominent: true))
             }
         }
         .onAppear { model.refresh(language: language) }
@@ -327,14 +326,14 @@ struct PermissionRows: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            StatusRow(symbol: "mic.fill", title: "Microfone", detail: "Para ouvir você enquanto o atalho está ativo", tint: permissions.microphone ? .green : .accentColor) {
+            StatusRow(symbol: "mic.fill", title: "Microfone", detail: "Para ouvir você enquanto o atalho está ativo") {
                 if permissions.microphone { GrantedBadge() } else {
-                    Button("Permitir") { permissions.requestMicrophone() }.buttonStyle(.glassProminent)
+                    Button("Permitir") { permissions.requestMicrophone() }.buttonStyle(PillButtonStyle(prominent: true))
                 }
             }
-            StatusRow(symbol: "accessibility", title: "Acessibilidade", detail: "Para detectar o atalho em qualquer app e digitar o texto", tint: permissions.accessibility ? .green : .accentColor) {
+            StatusRow(symbol: "accessibility", title: "Acessibilidade", detail: "Para detectar o atalho em qualquer app e digitar o texto") {
                 if permissions.accessibility { GrantedBadge() } else {
-                    Button("Abrir Ajustes") { Permissions.promptAccessibility() }.buttonStyle(.glassProminent)
+                    Button("Abrir Ajustes") { Permissions.promptAccessibility() }.buttonStyle(PillButtonStyle(prominent: true))
                 }
             }
         }
@@ -345,19 +344,43 @@ struct PermissionRows: View {
     }
 }
 
-/// The app glyph: a glass orb with a living waveform.
-struct AppGlyph: View {
+/// The app mark, drawn to match the icon: a graphite squircle with a quiet white waveform.
+struct AppMark: View {
     var size: CGFloat = 96
 
     var body: some View {
         ZStack {
-            Circle()
-                .fill(LinearGradient(colors: [Color(red: 0.42, green: 0.36, blue: 1), Color(red: 0.93, green: 0.36, blue: 0.75)],
-                                     startPoint: .topLeading, endPoint: .bottomTrailing))
-            Waveform(level: 0.6, color: .white, thinking: false, bars: 7, maxHeight: size * 0.42, barWidth: size * 0.045)
+            RoundedRectangle(cornerRadius: size * 0.225, style: .continuous)
+                .fill(LinearGradient(colors: [Color(white: 0.21), Color(white: 0.07)], startPoint: .top, endPoint: .bottom))
+                .overlay(RoundedRectangle(cornerRadius: size * 0.225, style: .continuous).strokeBorder(.white.opacity(0.1), lineWidth: 0.5))
+            HStack(spacing: size * 0.048) {
+                ForEach(Array([0.13, 0.25, 0.39, 0.52, 0.39, 0.25, 0.13].enumerated()), id: \.offset) { _, h in
+                    Capsule().fill(.white).frame(width: size * 0.06, height: size * h)
+                }
+            }
         }
         .frame(width: size, height: size)
-        .glassEffect(.regular.tint(.white.opacity(0.05)), in: .circle)
-        .shadow(color: Color(red: 0.6, green: 0.3, blue: 1).opacity(0.45), radius: size * 0.3, y: size * 0.1)
+        .shadow(color: .black.opacity(0.25), radius: size * 0.12, y: size * 0.05)
+    }
+}
+
+/// Neutral capsule buttons: prominent is solid label-colored (black in light mode, white in dark).
+struct PillButtonStyle: ButtonStyle {
+    var prominent: Bool
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 13, weight: .semibold))
+            .padding(.horizontal, prominent ? 18 : 14)
+            .frame(height: 30)
+            .foregroundStyle(prominent ? AnyShapeStyle(Color(nsColor: .windowBackgroundColor)) : AnyShapeStyle(.primary))
+            .background {
+                Capsule().fill(prominent ? AnyShapeStyle(Color.primary) : AnyShapeStyle(.quaternary))
+            }
+            .opacity(isEnabled ? (configuration.isPressed ? 0.8 : 1) : 0.4)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
+            .contentShape(.capsule)
     }
 }

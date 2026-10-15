@@ -23,32 +23,27 @@ func render(_ px: Int) -> Data {
     ctx.restoreGState()
 
     path.addClip()
-    let gradient = NSGradient(colors: [
-        NSColor(red: 0.30, green: 0.32, blue: 0.98, alpha: 1),
-        NSColor(red: 0.58, green: 0.36, blue: 0.98, alpha: 1),
-        NSColor(red: 0.96, green: 0.40, blue: 0.72, alpha: 1),
-    ])!
-    gradient.draw(in: body, angle: -55)
+    // Graphite body: near-black with a soft top-down falloff.
+    NSGradient(colors: [NSColor(white: 0.20, alpha: 1), NSColor(white: 0.07, alpha: 1)])!.draw(in: body, angle: -90)
 
-    // Soft glass highlight.
-    let glow = NSGradient(colors: [NSColor.white.withAlphaComponent(0.38), NSColor.white.withAlphaComponent(0)])!
-    glow.draw(in: NSBezierPath(ovalIn: CGRect(x: 40, y: 520, width: 944, height: 560)), relativeCenterPosition: NSPoint(x: 0, y: 0.4))
+    // Faint sheen across the top third.
+    let sheen = NSGradient(colors: [NSColor.white.withAlphaComponent(0.10), NSColor.white.withAlphaComponent(0)])!
+    sheen.draw(in: NSBezierPath(ovalIn: CGRect(x: -80, y: 560, width: 1184, height: 620)), relativeCenterPosition: NSPoint(x: 0, y: 0.5))
 
-    // Waveform bars.
-    let heights: [CGFloat] = [150, 270, 420, 300, 470, 330, 200]
-    let w: CGFloat = 58, gap: CGFloat = 34
+    // Waveform: white, symmetric, quiet.
+    let heights: [CGFloat] = [110, 210, 330, 440, 330, 210, 110]
+    let w: CGFloat = 50, gap: CGFloat = 40
     let total = CGFloat(heights.count) * w + CGFloat(heights.count - 1) * gap
     var x = 512 - total / 2
-    ctx.setShadow(offset: CGSize(width: 0, height: -6), blur: 18, color: NSColor(red: 0.2, green: 0.1, blue: 0.5, alpha: 0.35).cgColor)
-    NSColor.white.setFill()
     for h in heights {
-        NSBezierPath(roundedRect: CGRect(x: x, y: 512 - h / 2, width: w, height: h), xRadius: w / 2, yRadius: w / 2).fill()
+        let bar = NSBezierPath(roundedRect: CGRect(x: x, y: 512 - h / 2, width: w, height: h), xRadius: w / 2, yRadius: w / 2)
+        NSGradient(colors: [NSColor(white: 1, alpha: 1), NSColor(white: 0.82, alpha: 1)])!.draw(in: bar, angle: -90)
         x += w + gap
     }
 
     // Hairline edge.
-    NSColor.white.withAlphaComponent(0.25).setStroke()
-    path.lineWidth = 4
+    NSColor.white.withAlphaComponent(0.12).setStroke()
+    path.lineWidth = 3
     path.stroke()
 
     NSGraphicsContext.restoreGraphicsState()
