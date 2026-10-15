@@ -25,7 +25,7 @@ Binário de ~1,5 MB, sem dependências.
 
 Na primeira vez, o onboarding pede o login (se necessário), as permissões de Microfone e Acessibilidade, e o atalho.
 
-> Builds com assinatura ad-hoc mudam de identidade a cada recompilação, e o macOS pode pedir a permissão de Acessibilidade de novo. Para evitar isso, defina `FALA_SIGN_IDENTITY` com uma identidade de assinatura de código sua.
+> O build assina o app com um certificado local estável (criado uma vez por `scripts/setup-signing.sh` num keychain próprio em `~/.fala-signing`). Com assinatura ad-hoc, cada recompilação viraria um "app novo" para o macOS e as permissões de Acessibilidade/Microfone deixariam de valer. Para usar sua própria identidade, defina `FALA_SIGN_IDENTITY`.
 
 ## Testar pela linha de comando
 

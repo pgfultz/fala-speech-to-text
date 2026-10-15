@@ -323,6 +323,7 @@ struct AppleModelRow: View {
 
 struct PermissionRows: View {
     let permissions: PermissionModel
+    @State private var openedSettings = false
 
     var body: some View {
         VStack(spacing: 16) {
@@ -333,7 +334,19 @@ struct PermissionRows: View {
             }
             StatusRow(symbol: "accessibility", title: "Acessibilidade", detail: "Para detectar o atalho em qualquer app e digitar o texto") {
                 if permissions.accessibility { GrantedBadge() } else {
-                    Button("Abrir Ajustes") { Permissions.promptAccessibility() }.buttonStyle(PillButtonStyle(prominent: true))
+                    HStack(spacing: 8) {
+                        if openedSettings {
+                            Button("Redefinir") { Permissions.resetAccessibility() }
+                                .buttonStyle(PillButtonStyle(prominent: false))
+                                .help("Já ativou e continua pendente? Remove o registro antigo do Fala e pede de novo.")
+                                .transition(.opacity)
+                        }
+                        Button("Abrir Ajustes") {
+                            Permissions.promptAccessibility()
+                            withAnimation { openedSettings = true }
+                        }
+                        .buttonStyle(PillButtonStyle(prominent: true))
+                    }
                 }
             }
         }

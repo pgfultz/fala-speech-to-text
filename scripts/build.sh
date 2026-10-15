@@ -1,6 +1,7 @@
 #!/bin/zsh
 # Builds Fala.app (release) into ./build. Pass --install to copy it to /Applications and launch it.
-# Set FALA_SIGN_IDENTITY to a codesigning identity to keep macOS permissions across rebuilds.
+# Signs with a stable local identity (see setup-signing.sh) so macOS permissions survive rebuilds.
+# Set FALA_SIGN_IDENTITY to use your own identity instead.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -19,7 +20,11 @@ if [[ ! -f build/AppIcon.icns ]]; then
 fi
 cp build/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 
-codesign --force --sign "${FALA_SIGN_IDENTITY:--}" --identifier dev.fala.app "$APP"
+if [[ -z "${FALA_SIGN_IDENTITY:-}" ]]; then
+  ./scripts/setup-signing.sh
+  FALA_SIGN_IDENTITY="Fala Local Signing"
+fi
+codesign --force --sign "$FALA_SIGN_IDENTITY" --identifier dev.fala.app "$APP"
 echo "Built $APP ($(du -sh "$APP" | cut -f1))"
 
 if [[ "${1:-}" == "--install" ]]; then

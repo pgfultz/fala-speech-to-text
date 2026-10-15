@@ -71,6 +71,17 @@ enum Permissions {
         openSettings("Privacy_Accessibility")
     }
 
+    /// Clears a stale Accessibility entry (e.g. from an older build with a different signature)
+    /// and asks again, which re-adds the current app to the list.
+    static func resetAccessibility() {
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: "/usr/bin/tccutil")
+        p.arguments = ["reset", "Accessibility", Bundle.main.bundleIdentifier ?? "dev.fala.app"]
+        try? p.run()
+        p.waitUntilExit()
+        promptAccessibility()
+    }
+
     static func openSettings(_ anchor: String) {
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?\(anchor)")!)
     }
