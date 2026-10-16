@@ -86,6 +86,6 @@ final class AudioRecorder {
 
     enum RecorderError: LocalizedError {
         case noInput
-        var errorDescription: String? { "Nenhum microfone disponível" }
+        var errorDescription: String? { tr("No microphone available", "Nenhum microfone disponível") }
     }
 }

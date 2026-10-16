@@ -16,7 +16,7 @@
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-black">
 </p>
 
-> 🇧🇷 **Resumo em português:** o Fala é um app de ditado para macOS, no estilo do Wispr Flow e do superwhisper. Ele transcreve usando a sua assinatura do ChatGPT (pelo login do Codex, sem chave de API) ou o modelo de fala on-device da Apple. Para usar: segure um atalho, fale e solte, e o texto é colado no app em foco. A interface está em português. Instalação: `./scripts/build.sh --install`.
+> 🇧🇷 **Resumo em português:** o Fala é um app de ditado para macOS, no estilo do Wispr Flow e do superwhisper. Ele transcreve usando a sua assinatura do ChatGPT (pelo login do Codex, sem chave de API) ou o modelo de fala on-device da Apple. Para usar: segure um atalho, fale e solte, e o texto é colado no app em foco. A interface está em inglês e em português; escolha no onboarding ou em Ajustes. Instalação: `./scripts/build.sh --install`.
 
 ---
 
@@ -48,6 +48,8 @@ Apps like Wispr Flow and superwhisper are great, but they need another subscript
 - **Pastes and restores your clipboard**: the text goes to the focused app, and the previous clipboard contents come back.
 - **Recent transcriptions** in the menu bar, one click to copy.
 - **Onboarding** that handles login, permissions and shortcut setup.
+- **English and Portuguese UI**: pick the language on the first onboarding screen or in Settings. It switches instantly.
+- **Sound effects** on start and stop, which you can turn off.
 - **Tiny**: about 1.5 MB binary, no dependencies, pure Swift/SwiftUI/AppKit.
 
 ## Requirements
@@ -72,7 +74,7 @@ cd chatgpt-speech-to-text
 
 On first launch, onboarding walks you through these steps:
 
-1. **Engine**: ChatGPT or Apple on-device.
+1. **Language** (English or Português), then the **engine**: ChatGPT or Apple on-device.
 2. **Account**: if you're not logged in, it runs `codex login`, which opens your browser. If the Codex CLI isn't installed, run `npm i -g @openai/codex` or `brew install codex` first.
 3. **Permissions**:
    - **Microphone**: used only while the shortcut is active.
@@ -100,7 +102,7 @@ FALA_SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" ./scripts/buil
 | Release | Audio is transcribed and pasted into the focused app |
 | Quick tap (Smart mode) | Recording locks (🔒); tap again to finish |
 | `esc` | Cancels recording or transcription |
-| Menu bar → Recentes | Copies a previous transcription |
+| Menu bar → Recent | Copies a previous transcription |
 | Menu bar → engine | Switches between ChatGPT and Apple |
 
 **Using `fn` as the shortcut:** set **System Settings › Keyboard › "Press 🌐 key to" → Do Nothing**. Otherwise macOS opens the emoji picker.
@@ -151,19 +153,19 @@ $APP --onboarding                         # reopen onboarding
 ## Troubleshooting
 
 **Accessibility shows as enabled but Fala says it's missing.**
-The permission belongs to an older build that had a different signature. Click **Redefinir** next to "Abrir Ajustes" in Fala, or run `tccutil reset Accessibility dev.fala.app`. Then grant the permission again. After that, use `build.sh`'s stable signing so it doesn't happen again.
+The permission belongs to an older build that had a different signature. Click **Reset** next to "Open Settings" in Fala, or run `tccutil reset Accessibility dev.fala.app`. Then grant the permission again. After that, use `build.sh`'s stable signing so it doesn't happen again.
 
-**"Faça login no ChatGPT" (log in to ChatGPT).**
+**"Sign in to ChatGPT".**
 Run `codex login` and pick *Sign in with ChatGPT*. A Codex setup that uses an API key won't work for this engine.
 
-**"Limite de uso atingido" (usage limit reached).**
+**"Usage limit reached".**
 Your plan's dictation quota ran out. Switch to the Apple engine from the menu bar.
 
 **The ChatGPT engine suddenly fails with an HTTP error.**
 The endpoint isn't a public API and can change without notice. Run `$APP --transcribe file.wav` to see the full error, and please open an issue.
 
-**Nothing is pasted, but the text is on the clipboard.**
-Fala needs the Accessibility permission to send ⌘V.
+**"Copied — press ⌘V to paste" instead of inserting.**
+Fala needs the Accessibility permission to send ⌘V, so without it the text stays on the clipboard.
 
 ## Disclaimer
 
@@ -173,7 +175,7 @@ Fala is an independent project and is **not affiliated with, endorsed by, or sup
 
 Issues and pull requests are welcome. Some ideas:
 
-- [ ] English UI (strings are currently Portuguese only)
+- [ ] More UI languages (strings live in `tr("English", "Português")` calls)
 - [ ] Signed and notarized release builds on GitHub Releases
 - [ ] Optional LLM post-processing (clean up filler words, formatting, custom vocabulary)
 - [ ] Per-app engine or language preferences

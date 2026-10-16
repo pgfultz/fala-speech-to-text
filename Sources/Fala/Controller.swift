@@ -83,7 +83,7 @@ final class DictationController {
             if Permissions.microphone == .notDetermined {
                 Task { _ = await Permissions.requestMicrophone() }
             } else {
-                show(error: "Permita o acesso ao microfone")
+                show(error: tr("Allow microphone access", "Permita o acesso ao microfone"))
             }
             return
         }
@@ -132,7 +132,7 @@ final class DictationController {
 
         if peak < 0.06 || seconds < 0.3 {
             apple?.cancel()
-            show(error: "Não ouvi nada")
+            show(error: tr("Didn't catch that", "Não ouvi nada"))
             return
         }
 
@@ -145,11 +145,14 @@ final class DictationController {
                 }
                 guard id == session, !Task.isCancelled else { return }
                 if text.isEmpty {
-                    show(error: "Não ouvi nada")
+                    show(error: tr("Didn't catch that", "Não ouvi nada"))
                     return
                 }
                 settings.remember(text)
-                Paster.insert(text, restoreClipboard: settings.restoreClipboard)
+                guard Paster.insert(text, restoreClipboard: settings.restoreClipboard) else {
+                    show(error: tr("Copied — press ⌘V to paste", "Copiado — pressione ⌘V para colar"))
+                    return
+                }
                 phase = .done
                 scheduleHide(after: 0.9)
             } catch {
@@ -170,7 +173,7 @@ final class DictationController {
             phase = .idle
         } else {
             Sound.play("Funk")
-            phase = .error("Cancelado")
+            phase = .error(tr("Cancelled", "Cancelado"))
             scheduleHide(after: 0.8)
         }
     }
@@ -201,7 +204,7 @@ final class DictationController {
         Timer.scheduledTimer(withTimeInterval: 1 / 30, repeats: true) { timer in
             t += 1 / 30
             self.level = Float(0.35 + 0.35 * sin(t * 7) * sin(t * 2.3) + 0.2)
-            if partialText { self.partial = String("Isso é uma demonstração do Fala transcrevendo ao vivo".prefix(Int(t * 18))) }
+            if partialText { self.partial = String(tr("This is a demo of Fala transcribing live", "Isso é uma demonstração do Fala transcrevendo ao vivo").prefix(Int(t * 18))) }
             if t > 3.2 {
                 timer.invalidate()
                 self.phase = .transcribing

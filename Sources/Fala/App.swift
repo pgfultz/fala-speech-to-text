@@ -134,13 +134,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWind
         menu.removeAllItems()
 
         let header = NSMenuItem(title: "", action: nil, keyEquivalent: "")
-        header.attributedTitle = NSAttributedString(string: "Segure \(settings.shortcut.display) para falar",
+        header.attributedTitle = NSAttributedString(string: tr("Hold \(settings.shortcut.display) to talk", "Segure \(settings.shortcut.display) para falar"),
                                                     attributes: [.font: NSFont.systemFont(ofSize: 12, weight: .medium),
                                                                  .foregroundColor: NSColor.secondaryLabelColor])
         header.isEnabled = false
         menu.addItem(header)
         if !Permissions.accessibility {
-            menu.addItem(item("⚠︎ Permitir Acessibilidade…", #selector(openAccessibility)))
+            menu.addItem(item(tr("⚠︎ Allow Accessibility…", "⚠︎ Permitir Acessibilidade…"), #selector(openAccessibility)))
         }
         menu.addItem(.separator())
 
@@ -153,14 +153,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWind
         }
         if settings.engine == .chatgpt {
             let account = CodexAuth.profile()
-            let info = NSMenuItem(title: account?.email ?? "Não conectado — abra Ajustes", action: nil, keyEquivalent: "")
+            let info = NSMenuItem(title: account?.email ?? tr("Not connected — open Settings", "Não conectado — abra Ajustes"), action: nil, keyEquivalent: "")
             info.isEnabled = false
             info.indentationLevel = 1
             menu.addItem(info)
         }
         menu.addItem(.separator())
 
-        let recent = NSMenuItem(title: "Recentes", action: nil, keyEquivalent: "")
+        let recent = NSMenuItem(title: tr("Recent", "Recentes"), action: nil, keyEquivalent: "")
         let sub = NSMenu()
         if settings.history.isEmpty {
             let empty = NSMenuItem(title: "Nada ainda", action: nil, keyEquivalent: "")
@@ -171,17 +171,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWind
                 let title = h.text.count > 60 ? String(h.text.prefix(60)) + "…" : h.text
                 let i = item(title, #selector(copyRecent(_:)))
                 i.representedObject = h.text
-                i.toolTip = "Clique para copiar"
+                i.toolTip = tr("Click to copy", "Clique para copiar")
                 sub.addItem(i)
             }
         }
         recent.submenu = sub
         menu.addItem(recent)
         menu.addItem(.separator())
-        menu.addItem(item("Ajustes…", #selector(openSettings), key: ","))
-        menu.addItem(item("Configuração inicial…", #selector(openOnboarding)))
+        menu.addItem(item(tr("Settings…", "Ajustes…"), #selector(openSettings), key: ","))
+        menu.addItem(item(tr("Setup…", "Configuração inicial…"), #selector(openOnboarding)))
         menu.addItem(.separator())
-        menu.addItem(item("Sair do Fala", #selector(quit), key: "q"))
+        menu.addItem(item(tr("Quit Fala", "Sair do Fala"), #selector(quit), key: "q"))
     }
 
     private func item(_ title: String, _ action: Selector, key: String = "") -> NSMenuItem {
@@ -211,21 +211,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWind
                 self?.settingsWindow?.close()
                 self?.showOnboarding()
             })
-            let w = makeWindow(NSHostingController(rootView: view), title: "Ajustes do Fala")
+            let w = makeWindow(NSHostingController(rootView: view), title: tr("Fala Settings", "Ajustes do Fala"))
             w.styleMask.insert(.resizable)
             settingsWindow = w
         }
+        settingsWindow?.title = tr("Fala Settings", "Ajustes do Fala")
         present(settingsWindow!)
     }
 
     private func showOnboarding() {
         if onboardingWindow == nil {
             let view = OnboardingView(finish: { [weak self] in self?.onboardingWindow?.close() })
-            let w = makeWindow(NSHostingController(rootView: view), title: "Bem-vindo ao Fala")
+            let w = makeWindow(NSHostingController(rootView: view), title: tr("Welcome to Fala", "Bem-vindo ao Fala"))
             w.titleVisibility = .hidden
             w.isMovableByWindowBackground = true
             onboardingWindow = w
         }
+        onboardingWindow?.title = tr("Welcome to Fala", "Bem-vindo ao Fala")
         present(onboardingWindow!)
     }
 

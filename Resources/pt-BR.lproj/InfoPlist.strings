@@ -1,0 +1,2 @@
+"NSMicrophoneUsageDescription" = "O Fala usa o microfone apenas enquanto o atalho está ativo, para transformar sua fala em texto.";
+"NSSpeechRecognitionUsageDescription" = "O Fala usa o reconhecimento de fala on-device da Apple quando esse motor está selecionado.";

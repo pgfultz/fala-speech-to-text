@@ -19,9 +19,9 @@ actor CodexAuth {
         case notLoggedIn, apiKeyOnly, refreshFailed(String)
         var errorDescription: String? {
             switch self {
-            case .notLoggedIn: "Faça login no ChatGPT"
-            case .apiKeyOnly: "O Codex está usando chave de API — faça login com ChatGPT"
-            case .refreshFailed(let m): "Sessão expirada — faça login novamente (\(m))"
+            case .notLoggedIn: tr("Sign in to ChatGPT", "Faça login no ChatGPT")
+            case .apiKeyOnly: tr("Codex is using an API key — sign in with ChatGPT", "O Codex está usando chave de API — faça login com ChatGPT")
+            case .refreshFailed(let m): tr("Session expired — sign in again (\(m))", "Sessão expirada — faça login novamente (\(m))")
             }
         }
     }
@@ -120,9 +120,9 @@ enum ChatGPTTranscriber {
         case http(Int, String)
         var errorDescription: String? {
             switch self {
-            case .http(429, _): "Limite de uso atingido"
-            case .http(400, let m) where m.contains("too_short"): "Áudio muito curto"
-            case .http(let code, let body): "Falha na transcrição (HTTP \(code))" + (ProcessInfo.processInfo.arguments.contains("--transcribe") ? " \(body.prefix(300))" : "")
+            case .http(429, _): tr("Usage limit reached", "Limite de uso atingido")
+            case .http(400, let m) where m.contains("too_short"): tr("Audio too short", "Áudio muito curto")
+            case .http(let code, let body): tr("Transcription failed (HTTP \(code))", "Falha na transcrição (HTTP \(code))") + (ProcessInfo.processInfo.arguments.contains("--transcribe") ? " \(body.prefix(300))" : "")
             }
         }
     }

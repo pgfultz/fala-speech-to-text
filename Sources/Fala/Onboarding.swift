@@ -55,19 +55,21 @@ struct OnboardingView: View {
                 .font(.system(size: 34, weight: .semibold))
                 .tracking(-0.6)
                 .padding(.top, 26)
-            Text("Dite em qualquer app.\nSegure um atalho, fale e solte.")
+            Text(tr("Dictate into any app.\nHold a shortcut, speak, release.", "Dite em qualquer app.\nSegure um atalho, fale e solte."))
                 .font(.system(size: 15))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .lineSpacing(3)
                 .padding(.top, 10)
+            LanguageSwitcher(selection: $settings.uiLanguage)
+                .padding(.top, 28)
             Spacer()
         }
     }
 
     private var engine: some View {
         VStack(spacing: 28) {
-            Header(title: "Motor de transcrição", subtitle: "Você pode trocar depois pelo menu da barra.")
+            Header(title: tr("Transcription engine", "Motor de transcrição"), subtitle: tr("You can switch later from the menu bar.", "Você pode trocar depois pelo menu da barra."))
             VStack(spacing: 10) {
                 ForEach(Engine.allCases) { e in
                     EngineRow(engine: e, selected: settings.engine == e) {
@@ -81,16 +83,16 @@ struct OnboardingView: View {
     private var setup: some View {
         VStack(spacing: 28) {
             if settings.engine == .chatgpt {
-                Header(title: "Conta ChatGPT", subtitle: "O Fala usa o login do Codex. Sem chave de API —\na transcrição conta na cota da sua assinatura.")
+                Header(title: tr("ChatGPT account", "Conta ChatGPT"), subtitle: tr("Fala uses your Codex login. No API key —\ntranscription counts against your plan's quota.", "O Fala usa o login do Codex. Sem chave de API —\na transcrição conta na cota da sua assinatura."))
                 Surface { AccountRow(account: account) }
             } else {
-                Header(title: "Modelo on-device", subtitle: "A transcrição roda inteira no seu Mac.\nO macOS baixa o modelo do idioma uma única vez.")
+                Header(title: tr("On-device model", "Modelo on-device"), subtitle: tr("Transcription runs entirely on your Mac.\nmacOS downloads the language model once.", "A transcrição roda inteira no seu Mac.\nO macOS baixa o modelo do idioma uma única vez."))
                 Surface {
                     VStack(spacing: 14) {
                         HStack {
-                            Text("Idioma").font(.system(size: 13))
+                            Text(tr("Language", "Idioma")).font(.system(size: 13))
                             Spacer()
-                            Picker("Idioma", selection: $settings.language) {
+                            Picker(tr("Language", "Idioma"), selection: $settings.language) {
                                 ForEach(LanguageOption.all.dropFirst()) { Text($0.name).tag($0.code) }
                             }
                             .labelsHidden()
@@ -100,24 +102,24 @@ struct OnboardingView: View {
                         AppleModelRow(model: appleModel, language: settings.language)
                     }
                 }
-                .onAppear { if settings.language == "auto" { settings.language = "pt" } }
+                .onAppear { if settings.language == "auto" { settings.language = settings.uiLanguage.rawValue } }
             }
         }
     }
 
     private var permissionsPage: some View {
         VStack(spacing: 28) {
-            Header(title: "Permissões", subtitle: "O microfone só é usado enquanto o atalho está ativo.")
+            Header(title: tr("Permissions", "Permissões"), subtitle: tr("The microphone is only used while the shortcut is active.", "O microfone só é usado enquanto o atalho está ativo."))
             Surface { PermissionRows(permissions: permissions) }
         }
     }
 
     private var shortcut: some View {
         VStack(spacing: 28) {
-            Header(title: "Atalho", subtitle: "Clique e pressione uma tecla, uma combinação,\nou um modificador sozinho, como ⌥ direito ou fn.")
+            Header(title: tr("Shortcut", "Atalho"), subtitle: tr("Click and press a key, a combination,\nor a lone modifier like Right ⌥ or fn.", "Clique e pressione uma tecla, uma combinação,\nou um modificador sozinho, como ⌥ direito ou fn."))
             ShortcutRecorder(large: true)
             VStack(spacing: 12) {
-                Picker("Modo", selection: $settings.mode) {
+                Picker(tr("Mode", "Modo"), selection: $settings.mode) {
                     ForEach(TriggerMode.allCases) { Text($0.title).tag($0) }
                 }
                 .pickerStyle(.segmented)
@@ -128,13 +130,17 @@ struct OnboardingView: View {
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .frame(width: 380, height: 36, alignment: .top)
+                Toggle(tr("Sound effects", "Efeitos sonoros"), isOn: $settings.sounds)
+                    .toggleStyle(.switch)
+                    .controlSize(.small)
+                    .font(.system(size: 12.5))
             }
         }
     }
 
     private var tryIt: some View {
         VStack(spacing: 24) {
-            Header(title: "Experimente", subtitle: "Clique no campo abaixo, segure o atalho e fale.")
+            Header(title: tr("Try it", "Experimente"), subtitle: tr("Click the field below, hold the shortcut and speak.", "Clique no campo abaixo, segure o atalho e fale."))
             HStack(spacing: 5) {
                 ForEach(Array(settings.shortcut.parts.enumerated()), id: \.offset) { _, p in KeyCap(text: p, large: true) }
             }
@@ -147,7 +153,7 @@ struct OnboardingView: View {
                 .background(.quaternary.opacity(0.5), in: .rect(cornerRadius: 12, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(.separator))
             if !permissions.accessibility {
-                Label("O atalho precisa da permissão de Acessibilidade.", systemImage: "exclamationmark.circle")
+                Label(tr("The shortcut needs the Accessibility permission.", "O atalho precisa da permissão de Acessibilidade."), systemImage: "exclamationmark.circle")
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
             }
@@ -170,7 +176,7 @@ struct OnboardingView: View {
 
             HStack {
                 if step > 0 {
-                    Button("Voltar") { go(-1) }
+                    Button(tr("Back", "Voltar")) { go(-1) }
                         .buttonStyle(PillButtonStyle(prominent: false))
                         .transition(.opacity)
                 }
@@ -191,10 +197,10 @@ struct OnboardingView: View {
 
     private var nextTitle: String {
         switch step {
-        case 0: "Começar"
-        case 2 where settings.engine == .chatgpt && !account.connected: "Pular"
-        case steps - 1: "Concluir"
-        default: "Continuar"
+        case 0: tr("Get Started", "Começar")
+        case 2 where settings.engine == .chatgpt && !account.connected: tr("Skip", "Pular")
+        case steps - 1: tr("Done", "Concluir")
+        default: tr("Continue", "Continuar")
         }
     }
 
@@ -253,7 +259,7 @@ private struct EngineRow: View {
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 8) {
                         Text(engine.title).font(.system(size: 14, weight: .semibold))
-                        Text(engine == .chatgpt ? "Recomendado" : "Offline")
+                        Text(engine == .chatgpt ? tr("Recommended", "Recomendado") : "Offline")
                             .font(.system(size: 10.5, weight: .medium))
                             .foregroundStyle(.secondary)
                             .padding(.horizontal, 6).padding(.vertical, 2)
@@ -278,5 +284,37 @@ private struct EngineRow: View {
             }
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// Monochrome two-option switch for the interface language.
+private struct LanguageSwitcher: View {
+    @Binding var selection: UILanguage
+    @Namespace private var ns
+
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(UILanguage.allCases) { lang in
+                Button {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 1)) { selection = lang }
+                } label: {
+                    Text(lang.name)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(selection == lang ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary))
+                        .padding(.horizontal, 14)
+                        .frame(height: 26)
+                        .background {
+                            if selection == lang {
+                                Capsule().fill(.background).shadow(color: .black.opacity(0.15), radius: 1.5, y: 1)
+                                    .matchedGeometryEffect(id: "pill", in: ns)
+                            }
+                        }
+                        .contentShape(.capsule)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(3)
+        .background(.quaternary.opacity(0.6), in: .capsule)
     }
 }

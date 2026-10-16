@@ -12,6 +12,7 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp .build/arm64-apple-macosx/release/Fala "$APP/Contents/MacOS/Fala"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
+cp -R Resources/*.lproj "$APP/Contents/Resources/"
 
 if [[ ! -f build/AppIcon.icns ]]; then
   swift scripts/make-icon.swift build/AppIcon.iconset

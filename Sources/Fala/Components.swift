@@ -13,9 +13,9 @@ final class AccountModel {
     var connected: Bool { profile != nil }
 
     var label: String {
-        guard let profile else { return "Não conectado" }
+        guard let profile else { return tr("Not connected", "Não conectado") }
         let plan = profile.plan.map { " · " + Self.planName($0) } ?? ""
-        return (profile.email ?? "Conectado") + plan
+        return (profile.email ?? tr("Connected", "Conectado")) + plan
     }
 
     static func planName(_ raw: String) -> String {
@@ -156,7 +156,7 @@ struct ShortcutRecorder: View {
                         .fill(.primary)
                         .frame(width: 6, height: 6)
                         .phaseAnimator([1.0, 0.3]) { v, o in v.opacity(o) } animation: { _ in .easeInOut(duration: 0.7) }
-                    Text(held.isEmpty ? "Pressione o atalho…" : Shortcut(keyCode: lastModifier ?? 0, modifiers: 0).partsForFlags(held).joined(separator: " "))
+                    Text(held.isEmpty ? tr("Press a shortcut…", "Pressione o atalho…") : Shortcut(keyCode: lastModifier ?? 0, modifiers: 0).partsForFlags(held).joined(separator: " "))
                         .font(.system(size: large ? 14 : 12.5))
                         .foregroundStyle(.secondary)
                 } else {
@@ -173,7 +173,7 @@ struct ShortcutRecorder: View {
             .overlay(Capsule().strokeBorder(recording ? AnyShapeStyle(.primary.opacity(0.7)) : AnyShapeStyle(.separator.opacity(0.6))))
         }
         .buttonStyle(.plain)
-        .help("Clique e pressione uma tecla, combinação, ou um modificador sozinho (ex: ⌥ direito, fn)")
+        .help(tr("Click and press a key, a combination, or a lone modifier (e.g. Right ⌥, fn)", "Clique e pressione uma tecla, combinação, ou um modificador sozinho (ex: ⌥ direito, fn)"))
         .onDisappear { stop() }
     }
 
@@ -264,7 +264,7 @@ struct StatusRow<Trailing: View>: View {
 
 struct GrantedBadge: View {
     var body: some View {
-        Label("Pronto", systemImage: "checkmark")
+        Label(tr("Ready", "Pronto"), systemImage: "checkmark")
             .labelStyle(.titleAndIcon)
             .font(.system(size: 12, weight: .medium))
             .foregroundStyle(.secondary)
@@ -276,15 +276,15 @@ struct AccountRow: View {
     let account: AccountModel
 
     var body: some View {
-        StatusRow(symbol: "sparkles", title: "Conta ChatGPT", detail: account.connected ? account.label : (account.codexInstalled ? "Usa o mesmo login do Codex — sem chave de API" : "Instale o Codex CLI: npm i -g @openai/codex")) {
+        StatusRow(symbol: "sparkles", title: tr("ChatGPT account", "Conta ChatGPT"), detail: account.connected ? account.label : (account.codexInstalled ? tr("Uses your Codex login — no API key", "Usa o mesmo login do Codex — sem chave de API") : tr("Install the Codex CLI: npm i -g @openai/codex", "Instale o Codex CLI: npm i -g @openai/codex"))) {
             if account.connected {
                 GrantedBadge()
             } else if account.loggingIn {
-                HStack(spacing: 6) { ProgressView().controlSize(.small); Text("Aguardando navegador…").font(.caption).foregroundStyle(.secondary) }
+                HStack(spacing: 6) { ProgressView().controlSize(.small); Text(tr("Waiting for browser…", "Aguardando navegador…")).font(.caption).foregroundStyle(.secondary) }
             } else if account.codexInstalled {
-                Button("Entrar com ChatGPT") { account.login() }.buttonStyle(PillButtonStyle(prominent: true))
+                Button(tr("Sign in with ChatGPT", "Entrar com ChatGPT")) { account.login() }.buttonStyle(PillButtonStyle(prominent: true))
             } else {
-                Button("Copiar comando") { Paster.copy("npm i -g @openai/codex") }.buttonStyle(PillButtonStyle(prominent: false))
+                Button(tr("Copy command", "Copiar comando")) { Paster.copy("npm i -g @openai/codex") }.buttonStyle(PillButtonStyle(prominent: false))
             }
         }
         .animation(.spring, value: account.connected)
@@ -296,14 +296,14 @@ struct AppleModelRow: View {
     let language: String
 
     var body: some View {
-        StatusRow(symbol: "apple.logo", title: "Modelo on-device", detail: detail) {
+        StatusRow(symbol: "apple.logo", title: tr("On-device model", "Modelo on-device"), detail: detail) {
             switch model.state {
             case .ready: GrantedBadge()
-            case .unsupported: Text("Indisponível").font(.caption).foregroundStyle(.secondary)
+            case .unsupported: Text(tr("Unavailable", "Indisponível")).font(.caption).foregroundStyle(.secondary)
             case .downloading(let p):
                 ProgressView(value: p).frame(width: 90)
             case .missing:
-                Button("Baixar modelo") { model.install(language: language) }.buttonStyle(PillButtonStyle(prominent: true))
+                Button(tr("Download model", "Baixar modelo")) { model.install(language: language) }.buttonStyle(PillButtonStyle(prominent: true))
             }
         }
         .onAppear { model.refresh(language: language) }
@@ -313,10 +313,10 @@ struct AppleModelRow: View {
     private var detail: String {
         if let e = model.error { return e }
         switch model.state {
-        case .ready: return "Instalado. Funciona offline."
-        case .unsupported: return "Este idioma não é suportado pelo modelo da Apple"
-        case .downloading: return "Baixando modelo de fala da Apple…"
-        case .missing: return "Download único feito pelo macOS"
+        case .ready: return tr("Installed. Works offline.", "Instalado. Funciona offline.")
+        case .unsupported: return tr("This language isn't supported by Apple's model", "Este idioma não é suportado pelo modelo da Apple")
+        case .downloading: return tr("Downloading Apple's speech model…", "Baixando modelo de fala da Apple…")
+        case .missing: return tr("One-time download handled by macOS", "Download único feito pelo macOS")
         }
     }
 }
@@ -327,21 +327,21 @@ struct PermissionRows: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            StatusRow(symbol: "mic.fill", title: "Microfone", detail: "Para ouvir você enquanto o atalho está ativo") {
+            StatusRow(symbol: "mic.fill", title: tr("Microphone", "Microfone"), detail: tr("To hear you while the shortcut is active", "Para ouvir você enquanto o atalho está ativo")) {
                 if permissions.microphone { GrantedBadge() } else {
-                    Button("Permitir") { permissions.requestMicrophone() }.buttonStyle(PillButtonStyle(prominent: true))
+                    Button(tr("Allow", "Permitir")) { permissions.requestMicrophone() }.buttonStyle(PillButtonStyle(prominent: true))
                 }
             }
-            StatusRow(symbol: "accessibility", title: "Acessibilidade", detail: "Para detectar o atalho em qualquer app e digitar o texto") {
+            StatusRow(symbol: "accessibility", title: tr("Accessibility", "Acessibilidade"), detail: tr("To detect the shortcut in any app and type the text", "Para detectar o atalho em qualquer app e digitar o texto")) {
                 if permissions.accessibility { GrantedBadge() } else {
                     HStack(spacing: 8) {
                         if openedSettings {
-                            Button("Redefinir") { Permissions.resetAccessibility() }
+                            Button(tr("Reset", "Redefinir")) { Permissions.resetAccessibility() }
                                 .buttonStyle(PillButtonStyle(prominent: false))
-                                .help("Já ativou e continua pendente? Remove o registro antigo do Fala e pede de novo.")
+                                .help(tr("Already enabled but still pending? Removes Fala's stale entry and asks again.", "Já ativou e continua pendente? Remove o registro antigo do Fala e pede de novo."))
                                 .transition(.opacity)
                         }
-                        Button("Abrir Ajustes") {
+                        Button(tr("Open Settings", "Abrir Ajustes")) {
                             Permissions.promptAccessibility()
                             withAnimation { openedSettings = true }
                         }

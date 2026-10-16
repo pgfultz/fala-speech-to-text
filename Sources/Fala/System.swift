@@ -6,7 +6,9 @@ import Speech
 
 /// Inserts text into the frontmost app by pasting, then restores the previous clipboard.
 enum Paster {
-    static func insert(_ text: String, restoreClipboard: Bool) {
+    /// Returns false when the text could only be copied (no Accessibility permission to send ⌘V).
+    @discardableResult
+    static func insert(_ text: String, restoreClipboard: Bool) -> Bool {
         let pb = NSPasteboard.general
         let saved: [NSPasteboardItem]? = restoreClipboard ? snapshot(pb) : nil
 
@@ -15,7 +17,7 @@ enum Paster {
         pb.setString("", forType: NSPasteboard.PasteboardType("org.nspasteboard.TransientType"))
         let changeCount = pb.changeCount
 
-        guard Permissions.accessibility else { return } // text stays on the clipboard
+        guard Permissions.accessibility else { return false } // text stays on the clipboard
 
         let source = CGEventSource(stateID: .combinedSessionState)
         let v = CGKeyCode(9)
@@ -33,6 +35,7 @@ enum Paster {
                 if !saved.isEmpty { pb.writeObjects(saved) }
             }
         }
+        return true
     }
 
     private static func snapshot(_ pb: NSPasteboard) -> [NSPasteboardItem] {

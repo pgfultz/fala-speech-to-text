@@ -68,7 +68,7 @@ final class AppleTranscriber {
 
     enum AppleError: LocalizedError {
         case unsupportedLanguage
-        var errorDescription: String? { "Idioma não suportado pelo modelo da Apple" }
+        var errorDescription: String? { tr("Language not supported by Apple's model", "Idioma não suportado pelo modelo da Apple") }
     }
 
     /// Starts the analyzer. Audio appended before it is ready is queued, so nothing is lost.

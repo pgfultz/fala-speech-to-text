@@ -331,7 +331,7 @@ private struct Trailing: View {
         case .transcribing:
             Waveform(level: 0.45, color: color.opacity(0.7), thinking: true)
         case .done:
-            Text("Inserido").font(.system(size: 12, weight: .medium)).foregroundStyle(color.opacity(0.8))
+            Text(tr("Inserted", "Inserido")).font(.system(size: 12, weight: .medium)).foregroundStyle(color.opacity(0.8))
                 .transition(.blurReplace)
         default:
             EmptyView()

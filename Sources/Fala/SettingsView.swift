@@ -11,7 +11,7 @@ struct SettingsView: View {
     var body: some View {
         Form {
             Section {
-                Picker("Motor", selection: $settings.engine) {
+                Picker(tr("Engine", "Motor"), selection: $settings.engine) {
                     ForEach(Engine.allCases) { Label($0.title, systemImage: $0.symbol).tag($0) }
                 }
                 .pickerStyle(.segmented)
@@ -25,40 +25,43 @@ struct SettingsView: View {
                 }
                 .padding(.vertical, 4)
             } header: {
-                Text("Transcrição")
+                Text(tr("Transcription", "Transcrição"))
             } footer: {
                 Text(settings.engine.subtitle).foregroundStyle(.secondary)
             }
 
             Section {
-                LabeledContent("Atalho") { ShortcutRecorder() }
-                Picker("Modo", selection: $settings.mode) {
+                LabeledContent(tr("Shortcut", "Atalho")) { ShortcutRecorder() }
+                Picker(tr("Mode", "Modo"), selection: $settings.mode) {
                     ForEach(TriggerMode.allCases) { Text($0.title).tag($0) }
                 }
             } header: {
-                Text("Atalho")
+                Text(tr("Shortcut", "Atalho"))
             } footer: {
-                Text(settings.mode.detail + " Pressione esc para cancelar. Para usar fn 🌐, defina em Ajustes › Teclado “Pressionar 🌐 para: Não fazer nada”.")
+                Text(settings.mode.detail + tr(" Press esc to cancel. To use fn 🌐, set System Settings › Keyboard “Press 🌐 key to: Do Nothing”.", " Pressione esc para cancelar. Para usar fn 🌐, defina em Ajustes › Teclado “Pressionar 🌐 para: Não fazer nada”."))
                     .foregroundStyle(.secondary)
             }
 
-            Section("Idioma") {
-                Picker("Idioma falado", selection: $settings.language) {
+            Section(tr("Language", "Idioma")) {
+                Picker(tr("App language", "Idioma do app"), selection: $settings.uiLanguage) {
+                    ForEach(UILanguage.allCases) { Text($0.name).tag($0) }
+                }
+                Picker(tr("Spoken language", "Idioma falado"), selection: $settings.language) {
                     ForEach(LanguageOption.all) { Text($0.name).tag($0.code) }
                 }
             }
 
-            Section("Aparência e comportamento") {
-                Picker("Indicador", selection: $settings.pillStyle) {
+            Section(tr("Appearance & behavior", "Aparência e comportamento")) {
+                Picker(tr("Indicator", "Indicador"), selection: $settings.pillStyle) {
                     ForEach(PillStyle.allCases) { Text($0.title).tag($0) }
                 }
-                Toggle("Sons sutis", isOn: $settings.sounds)
-                Toggle("Restaurar área de transferência após colar", isOn: $settings.restoreClipboard)
-                Toggle("Abrir ao iniciar sessão", isOn: $launchAtLogin)
+                Toggle(tr("Sound effects", "Efeitos sonoros"), isOn: $settings.sounds)
+                Toggle(tr("Restore clipboard after pasting", "Restaurar área de transferência após colar"), isOn: $settings.restoreClipboard)
+                Toggle(tr("Open at login", "Abrir ao iniciar sessão"), isOn: $launchAtLogin)
                     .onChange(of: launchAtLogin) { _, on in LaunchAtLogin.set(on) }
             }
 
-            Section("Permissões") {
+            Section(tr("Permissions", "Permissões")) {
                 PermissionRows(permissions: permissions).padding(.vertical, 4)
             }
 
@@ -72,21 +75,21 @@ struct SettingsView: View {
                                 Paster.copy(item.text)
                             } label: { Image(systemName: "doc.on.doc") }
                             .buttonStyle(.borderless)
-                            .help("Copiar")
+                            .help(tr("Copy", "Copiar"))
                         }
                     }
                 } header: {
                     HStack {
-                        Text("Recentes")
+                        Text(tr("Recent", "Recentes"))
                         Spacer()
-                        Button("Limpar") { settings.history.removeAll() }.buttonStyle(.borderless).font(.caption)
+                        Button(tr("Clear", "Limpar")) { settings.history.removeAll() }.buttonStyle(.borderless).font(.caption)
                     }
                 }
             }
 
             Section {
                 HStack {
-                    Button("Refazer configuração inicial", action: reopenOnboarding).buttonStyle(PillButtonStyle(prominent: false))
+                    Button(tr("Run setup again", "Refazer configuração inicial"), action: reopenOnboarding).buttonStyle(PillButtonStyle(prominent: false))
                     Spacer()
                     Text("Fala 1.0").font(.caption).foregroundStyle(.tertiary)
                 }

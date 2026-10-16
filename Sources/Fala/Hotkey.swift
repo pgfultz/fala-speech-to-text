@@ -43,16 +43,16 @@ struct Shortcut: Codable, Equatable {
 enum KeyNames {
     static func name(for code: UInt16, sided: Bool = true) -> String {
         switch Int(code) {
-        case 54: return sided ? "⌘ direito" : "⌘"
-        case 55: return sided ? "⌘ esquerdo" : "⌘"
-        case 58: return sided ? "⌥ esquerdo" : "⌥"
-        case 61: return sided ? "⌥ direito" : "⌥"
-        case 59: return sided ? "⌃ esquerdo" : "⌃"
-        case 62: return sided ? "⌃ direito" : "⌃"
-        case 56: return sided ? "⇧ esquerdo" : "⇧"
-        case 60: return sided ? "⇧ direito" : "⇧"
+        case 54: return sided ? tr("Right ⌘", "⌘ direito") : "⌘"
+        case 55: return sided ? tr("Left ⌘", "⌘ esquerdo") : "⌘"
+        case 58: return sided ? tr("Left ⌥", "⌥ esquerdo") : "⌥"
+        case 61: return sided ? tr("Right ⌥", "⌥ direito") : "⌥"
+        case 59: return sided ? tr("Left ⌃", "⌃ esquerdo") : "⌃"
+        case 62: return sided ? tr("Right ⌃", "⌃ direito") : "⌃"
+        case 56: return sided ? tr("Left ⇧", "⇧ esquerdo") : "⇧"
+        case 60: return sided ? tr("Right ⇧", "⇧ direito") : "⇧"
         case 63: return "fn 🌐"
-        case kVK_Space: return "Espaço"
+        case kVK_Space: return tr("Space", "Espaço")
         case kVK_Return: return "↩"
         case kVK_Tab: return "⇥"
         case kVK_Delete: return "⌫"

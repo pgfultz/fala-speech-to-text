@@ -2,6 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>en</string>
+        <string>pt-BR</string>
+    </array>
     <key>CFBundleName</key>
     <string>Fala</string>
     <key>CFBundleDisplayName</key>
@@ -25,8 +32,8 @@
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>NSMicrophoneUsageDescription</key>
-    <string>O Fala usa o microfone apenas enquanto você segura o atalho, para transformar sua fala em texto.</string>
+    <string>Fala uses the microphone only while your shortcut is active, to turn your speech into text.</string>
     <key>NSSpeechRecognitionUsageDescription</key>
-    <string>O Fala usa o reconhecimento de fala on-device da Apple quando esse motor está selecionado.</string>
+    <string>Fala uses Apple's on-device speech recognition when that engine is selected.</string>
 </dict>
 </plist>
